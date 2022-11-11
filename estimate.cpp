@@ -14,8 +14,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#define N 9
-#define TEST_NUM 1
+#define N 30
 
 using namespace std;
 using namespace Eigen;
@@ -40,7 +39,7 @@ double fE(MatrixXd W1_para, double (&factor)[N][10], double mental[N], double si
 
 void out_tmppara(char *filename, MatrixXd W1_para);
 
-void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N][10], double sig_total[4],int id_num,int test_num,int moto_count);
+void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N][10], double sig_total[4],int id_num,int moto_count);
 
 int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
 
@@ -56,116 +55,118 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
   char err_log[100];
   MatrixXd W1_para(10,4);
 
-  //select data;
-  //for(int id_num=0;id_num<9;id_num++){
   int id_num=0;
+  if(argc > 1){
+    std::string id_input_str = argv[1];
+    id_num=stoi(id_input_str);
+    printf("id is %d\n",id_num);
+  }
+
   const int set_num = N;
   std::cout<<"N: "<<N<<std::endl;
 
-  for(int t=0;t<TEST_NUM;t++){
-    //int t =0;
-    //std::cout<<"test num: "<<t<<std::endl;
+  sprintf(factor_name,"./data/%d/factor_before.csv",id_num);
+  sprintf(signal_name,"./data/%d/signal_before.csv",id_num);
+  sprintf(err_log,"./data/%d/error_phi.csv",id_num);
 
-    sprintf(factor_name,"/home/kazumi/prog/virtual_subject/virtual_data/factor_%d.csv",N);
-    sprintf(signal_name,"/home/kazumi/prog/virtual_subject/virtual_data/face_%d.csv",N);
-    sprintf(err_log,"/home/kazumi/prog/virtual_subject/virtual_data/output/error_phi_%d.csv",N);
+  std::ofstream err_ofs(err_log);
 
-    std::ofstream err_ofs(err_log);
+  read_file(factor_name, 10,_factor);
+  read_file(signal_name, 4,_signal);
+  //cout<<factor_name<<std::endl;
 
-    read_file(factor_name, 10,_factor);
-    read_file(signal_name, 4,_signal);
-    //cout<<factor_name<<std::endl;
+  memcpy(factor,*_factor,sizeof(factor));
+  memcpy(signal,*_signal,sizeof(signal));
 
-    memcpy(factor,*_factor,sizeof(factor));
-    memcpy(signal,*_signal,sizeof(signal));
-
-    double m_org[N];
-    double mental[N];
-    srand((unsigned) time(NULL));
-    for(int ment_num=0;ment_num<N;ment_num++){
-      m_org[ment_num]={0};
-    }
-    memcpy(mental,m_org,sizeof(m_org));
-
-    double dEdM[N] = {0};
-
-    //int step_i=0;
-    int errflg=0;
-    double err=10;
-
-    std::cout << std::fixed;
-    int count=0;
-
-    char tmp_w_filename[50] = "weight_zero_trial00.csv";
-    ofstream init_out(tmp_w_filename,ios::app);
-    ofstream mental_out("mental_log_trial00.csv",ios::app);
-
-    init_out<<id_num<<","<<t<<","<<count<<"==================="<<std::endl;
-
-    while(errflg==0){
-      //cout<<"test_num:"<<t<<" err"<<std::setprecision(10)<<err<<" count:"<<count<<", M:";
-      mental_out<<"test_num:"<<t<<" err"<<std::setprecision(10)<<err<<" count:"<<count<<", M:";
-
-      for(int m_check=0;m_check<N;m_check++){
-        //cout<<std::setprecision(2)<<mental[m_check]<<", ";
-        mental_out<<std::setprecision(2)<<mental[m_check]<<", ";
-      }
-      //cout<<std::endl;
-      mental_out<<std::endl;
-
-      //MatrixXd W1_para(10,4);
-      get_para(factor, signal, mental, &W1_para);
-
-      double sig_total[4]={0};
-      for(int emo_num=0;emo_num<4;emo_num++){
-        for(int col_num1 = 0; col_num1<N; col_num1++){
-          sig_total[emo_num] += signal[col_num1][emo_num];
-        }
-      }
-
-      int count_mgrad=0;
-      double E_pre =fE(W1_para,factor,m_org,sig_total);
-
-      grad_descent(m_org,mental,W1_para,factor,sig_total,id_num,t,count);
-
-      //S誤を求める
-      err = abs(fE(W1_para, factor, mental,sig_total) - E_pre);
-
-      init_out<<id_num<<","<<t<<","<<count<<"==================="<<std::endl;
-      out_tmppara(tmp_w_filename, W1_para);
-      err_ofs<<err<<std::endl;
-
-      count++;
-      memcpy(m_org,mental,sizeof(mental));
-      if(err<=0.0000001){
-        errflg=1;
-      }else if(count>=50000000){//KENSYU: loop count
-        errflg=1;
-      }
-    }
-    char hap[100],sup[100],ang[100],sad[100],face[100];
-    sprintf(hap,"/home/kazumi/prog/virtual_subject/virtual_data/output/hap_weight_%d.csv",N);
-
-    sprintf(sup,"/home/kazumi/prog/virtual_subject/virtual_data/output/sup_weight_%d.csv",N);
-    sprintf(ang,"/home/kazumi/prog/virtual_subject/virtual_data/output/ang_weight_%d.csv",N);
-    sprintf(sad,"/home/kazumi/prog/virtual_subject/virtual_data/output/sad_weight_%d.csv",N);
-
-    ofstream log1(hap,ios::app);
-    ofstream log2(sup,ios::app);
-    ofstream log3(ang,ios::app);
-    ofstream log4(sad,ios::app);
-
-    for(int factor_num=0;factor_num<10;factor_num++){
-      log1<<W1_para(factor_num,0)<<endl;
-      log2<<W1_para(factor_num,1)<<endl;
-      log3<<W1_para(factor_num,2)<<endl;
-      log4<<W1_para(factor_num,3)<<endl;
-    }
-    out_tmppara(tmp_w_filename, W1_para);
-    double total[4]={0};
-    f_mm(W1_para, factor, mental, total);
+  double m_org[N];
+  double mental[N];
+  srand((unsigned) time(NULL));
+  for(int ment_num=0;ment_num<N;ment_num++){
+    m_org[ment_num]={0};
   }
-  //}
+  memcpy(mental,m_org,sizeof(m_org));
+
+  double dEdM[N] = {0};
+
+  //int step_i=0;
+  int errflg=0;
+  double err=10;
+
+  std::cout << std::fixed;
+  int count=0;
+
+  char tmp_w_filename[50] = "weight_zero_trial00.csv";
+  ofstream init_out(tmp_w_filename,ios::app);
+  ofstream mental_out("mental_log_trial00.csv",ios::app);
+
+  init_out<<id_num<<","<<count<<"==================="<<std::endl;
+
+  while(errflg==0){
+    printf("checkpoint\n");
+    std::cout<<"err"<<std::setprecision(10)<<err<<" count:"<<count<<", M:";
+    mental_out<<"err"<<std::setprecision(10)<<err<<" count:"<<count<<", M:";
+
+    for(int m_check=0;m_check<N;m_check++){
+      //cout<<std::setprecision(2)<<mental[m_check]<<", ";
+      mental_out<<std::setprecision(2)<<mental[m_check]<<", ";
+    }
+    //cout<<std::endl;
+    mental_out<<std::endl;
+
+    //MatrixXd W1_para(10,4);
+    get_para(factor, signal, mental, &W1_para);
+
+    double sig_total[4]={0};
+    for(int emo_num=0;emo_num<4;emo_num++){
+      for(int col_num1 = 0; col_num1<N; col_num1++){
+        sig_total[emo_num] += signal[col_num1][emo_num];
+      }
+    }
+
+    int count_mgrad=0;
+    double E_pre =fE(W1_para,factor,m_org,sig_total);
+
+    //grad_descent(m_org,mental,W1_para,factor,sig_total,id_num,t,count);
+    grad_descent(m_org,mental,W1_para,factor,sig_total,id_num,count);
+    printf("checkpoint grad\n");
+
+    //S誤を求める
+    err = abs(fE(W1_para, factor, mental,sig_total) - E_pre);
+
+    init_out<<id_num<<","<<count<<"==================="<<std::endl;
+    out_tmppara(tmp_w_filename, W1_para);
+    err_ofs<<err<<std::endl;
+    std::cout<<id_num<<","<<count<<std::endl;
+
+    count++;
+    memcpy(m_org,mental,sizeof(mental));
+    if(err<=0.0000001){
+      errflg=1;
+    }else if(count>=50000000){//KENSYU: loop count
+      errflg=1;
+    }
+    printf("checkpoint err%f\n",err);
+  }
+  char hap[100],sup[100],ang[100],sad[100],face[100];
+  sprintf(hap,"./data/%d/hap_weight.csv",id_num);
+  sprintf(sup,"./data/%d/sup_weight.csv",id_num);
+  sprintf(ang,"./data/%d/ang_weight.csv",id_num);
+  sprintf(sad,"./data/%d/sad_weight.csv",id_num);
+
+  ofstream log1(hap,ios::app);
+  ofstream log2(sup,ios::app);
+  ofstream log3(ang,ios::app);
+  ofstream log4(sad,ios::app);
+
+  for(int factor_num=0;factor_num<10;factor_num++){
+    log1<<W1_para(factor_num,0)<<endl;
+    log2<<W1_para(factor_num,1)<<endl;
+    log3<<W1_para(factor_num,2)<<endl;
+    log4<<W1_para(factor_num,3)<<endl;
+  }
+  out_tmppara(tmp_w_filename, W1_para);
+  double total[4]={0};
+  f_mm(W1_para, factor, mental, total);
 }
 
 
@@ -196,7 +197,7 @@ void read_file(char *filename, int size2, double **data){
     while(getline(ifs,line)){
       std::stringstream ss(line);
       for(i=0;i<size2;i++){
-        getline(ss,data_f[i],',');
+        getline(ss,data_f[i],'\t');
         hoga=std::stod(data_f[i]);
         hage=std::stod(data_f[i]);
         data[j][i]=hage;
@@ -206,7 +207,7 @@ void read_file(char *filename, int size2, double **data){
 
 }
 
-void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N][10], double sig_total[4],int id_num,int test_num,int moto_count){
+void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N][10], double sig_total[4],int id_num,int moto_count){
   double dEdM[N]={0};
   double err=100;
   double Msize[N];
@@ -239,8 +240,8 @@ void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N
     //std::cout<<std::setprecision(4)<<"err:"<<err<<std::endl;
     memcpy(M_org,M,sizeof(Msize));
 
-    //cout<<"gd_descent("<<id_num<<"-"<<test_num<<"-"<<moto_count<<"),"<<std::setprecision(10)<<err<<","<<count<<",";
-    mental_out<<"gd_descent("<<id_num<<"-"<<test_num<<"-"<<moto_count<<"),"<<std::setprecision(10)<<err<<","<<count<<",";
+    mental_out<<"gd_descent("<<id_num<<"-"<<"-"<<moto_count<<"),"<<std::setprecision(10)<<err<<","<<count<<",";
+    std::cout<<"gd_descent("<<id_num<<"-"<<"-"<<moto_count<<"),"<<std::setprecision(10)<<err<<","<<count<<",";
     for(int m_check=0;m_check<N;m_check++){
       //cout<<std::setprecision(2)<<M[m_check]<<", ";
       mental_out<<std::setprecision(2)<<M[m_check]<<", ";
@@ -248,6 +249,7 @@ void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N
 
     //cout<<std::endl;
     mental_out<<std::endl;
+    std::cout<<std::endl;
     count++;
     if(count>50000000){
       break;
@@ -307,7 +309,6 @@ void setPhi(double (&factor)[N][10],double mental[N], int emo_num, Mat_phi *Phi)
 }
 
 void get_para(double (&factor)[N][10], double (&signal)[N][4], double mental[N], MatrixXd *W1_para){
-
   Mat_phi Phi1,Phi2,Phi3,Phi4;//計画行列のこと  //行優先の行列
 
   setPhi(factor, mental,0,&Phi1);
@@ -316,6 +317,7 @@ void get_para(double (&factor)[N][10], double (&signal)[N][4], double mental[N],
   setPhi(factor, mental,3,&Phi4);
 
   MatrixXd Sig_tar(N,4);//目標値tに相当します//最後の１列は全部１
+  printf("checkpoint getpara\n");
 
   for(int d_num=0;d_num<N;d_num++){
     for(int e_num=0;e_num<4;e_num++){

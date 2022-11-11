@@ -11,7 +11,6 @@
 //#include <sys/types.h>
 
 #define N 30
-#define TEST_NUM 1
 
 //#define ERROR 0.01;//1e-6;
 
@@ -59,8 +58,8 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
       set_num = (1+num)* 5;
       //set_num = 40;
       for(int t=0;t<30;t++){
-        sprintf(out_name,"/home/kazumi/prog/quiz_check2016/jrm_test/%d/estimated_phi%d-%d.csv",id_num+1,set_num,t);//コマンドライン引数のmental.csvのタイトルをファイル名にする
-        sprintf(factor_name,"/home/kazumi/prog/quiz_check2016/jrm_test/%d/factor_test%d-%d.csv",id_num+1,set_num,t);
+        sprintf(out_name,"./data/%d/estimated_phi.csv",id_num+1);//コマンドライン引数のmental.csvのタイトルをファイル名にする
+        sprintf(factor_name,"./data/%d/factor_test.csv",id_num+1);
 
         ifs.open(factor_name);//状況データ読み込み
         while(getline(ifs,line)){
@@ -75,7 +74,7 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
         }
 
         j=0;
-        sprintf(signal_name,"/home/kazumi/prog/quiz_check2016/jrm_test/%d/face_test%d-%d.csv",id_num+1,set_num,t);
+        sprintf(signal_name,"./data/%d/signal_test.csv",id_num+1);
         ifs2.open(signal_name);//Sデータを読み込み
         while(getline(ifs2,line2)){
           stringstream ss2(line2);
@@ -91,10 +90,10 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
         //表情観測結果から現在のM推定するための表情モデルパラメタを読み込み
         double facial_para[4] = {};
 
-        sprintf(hap_in, "/home/kazumi/prog/quiz_check2016/jrm_test/%d/hap_weight%d-%d.csv", id_num+1,set_num,t);//happyのパラメタを読み込む
-        sprintf(sup_in, "/home/kazumi/prog/quiz_check2016/jrm_test/%d/sup_weight%d-%d.csv", id_num+1,set_num,t);//supのパラメタを読み込む
-        sprintf(ang_in, "/home/kazumi/prog/quiz_check2016/jrm_test/%d/ang_weight%d-%d.csv", id_num+1,set_num,t);//angのパラメタを読み込む
-        sprintf(sad_in, "/home/kazumi/prog/quiz_check2016/jrm_test/%d/sad_weight%d-%d.csv", id_num+1,set_num,t);//sadのパラメタを読み込む
+        sprintf(hap_in, "./data/%d/hap_weight.csv", id_num+1);//happyのパラメタを読み込む
+        sprintf(sup_in, "./data/%d/sup_weight.csv", id_num+1);//supのパラメタを読み込む
+        sprintf(ang_in, "./data/%d/ang_weight.csv", id_num+1);//angのパラメタを読み込む
+        sprintf(sad_in, "./data/%d/sad_weight.csv", id_num+1);//sadのパラメタを読み込む
 
         ifstream hap_model_in(hap_in);//happyのおもみを読み込み
         ifstream sup_model_in(sup_in);//supのおもみを読み込みf
