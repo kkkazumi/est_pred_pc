@@ -78,3 +78,16 @@
 ## func_new.py
 
 - contains new functions to calculate again.#mental estimation prog tutorial
+
+## face vs mood
+- as the master thesis project, two methods of selecting robot's behavior based on 1)face and 2)mood are compared.
+  - note: orders of counter balance
+    - 1: 1)mood,2)face
+    - 2: 1)mood,2)face
+    - 3: 1)mood, 2)face
+    - 4: 1)face,2)mood
+    - 5: 1)face, 2)mood
+    - 6: 1)mood, 2)face
+    - 7: 1)mood, 2)face
+    - 8: 1)mood, 2)face
+    - 9: 1)face,2)mood
