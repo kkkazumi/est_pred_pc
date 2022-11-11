@@ -40,5 +40,5 @@ for name_num in (0,1,2,3,4,5,6,7,8):
     print("m_pred",m_pred)
 
   #test output
-  outname = dir_name + "/TRAINestimated_nn.csv"
+  outname = dir_name + "/dm_pred.csv"
   np.savetxt(outname,m_pred,fmt="%.3f")
