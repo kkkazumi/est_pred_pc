@@ -10,7 +10,7 @@ from scipy.stats import pearsonr
 
 INPUT_DIM = 11
 MID_UNIT = 15
-OUTPUT_DIM = 4
+OUTPUT_DIM = 1
 EPOCH = 50000
 
 for name_num in (0,1,2,3,4,5,6,7,8):
@@ -18,17 +18,16 @@ for name_num in (0,1,2,3,4,5,6,7,8):
   set_num = 29
 
   factor_train = dir_name + "/factor_before.csv"
-  mood_train = dir_name + "/dm_calc.csv" 
-  face_train = dir_name + "/signal_before.csv"
+  mood_train = dir_name + "/norm_mental.csv"
+  dm_train= dir_name + "/dm_calc.csv" 
+  #face_train = dir_name + "/signal_before.csv"
 
   x1_train = np.loadtxt(factor_train,delimiter='\t')
   x2_train = np.loadtxt(mood_train,delimiter=',')
-  print(x1_train[:-1].shape)
 
-  """
-  x_train = np.hstack((x1_train[:-1],x2_train.reshape(-1,1)))
-
-  y_train = np.loadtxt(face_train,delimiter='\t')
+  x_train = np.hstack((x1_train[:-1],x2_train[:-1].reshape(-1,1)))
+  y_train = np.loadtxt(dm_train,delimiter=',')
+  #y_train = np.loadtxt(face_train,delimiter='\t')
 
   def objective(trial):
     #セッションのクリア
@@ -64,7 +63,7 @@ for name_num in (0,1,2,3,4,5,6,7,8):
   optimizer=study.best_params["optimizer"]
 
   best_params = ["mid_units:",str(mid_units),",activation:" ,activation,",optimizer:",optimizer]
-  path_w  = dir_name+"/nn_best_params"+str(set_num)+"-"+str(i)+".txt"
+  path_w  = dir_name+"/nn_best_params.txt"
   with open(path_w, mode='w') as f:
       f.writelines(best_params)
 
@@ -78,8 +77,7 @@ for name_num in (0,1,2,3,4,5,6,7,8):
         metrics=["accuracy"])
 
   train=model.fit(x=x_train, y=y_train, nb_epoch=EPOCH)
-  model.save(dir_name+"/nn_model"+str(set_num)+"-"+str(i)+".h5")
+  model.save(dir_name+"/nn_model.h5")
 
   lossname = dir_name + "/nn_loss.csv"
   np.savetxt(lossname,train.history['loss'])
-  """
