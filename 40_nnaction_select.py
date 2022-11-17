@@ -1,66 +1,76 @@
 import numpy as np
 import scipy as sp
 from scipy.stats import pearsonr
+from sklearn import preprocessing
 
-INPUT_DIM = 11
-MID_UNIT = 15
-OUTPUT_DIM = 1
+import optuna
+import keras.backend as K
+from keras.models import Sequential, Model, load_model
+from keras.layers import Input, Dense, Activation
+from keras.layers.advanced_activations import LeakyReLU
+
+FACTOR_NUM = 10
+MENTAL_NUM = 1
+INPUT_DIM = FACTOR_NUM + MENTAL_NUM
+OUTPUT_DIM = 1 #dm
 EPOCH = 50000
+
+ACTION_NUM = 5
 
 for name_num in (0,1,2,3,4,5,6,7,8):
   dir_name = "./data/" + str(name_num+1)
   #test to output
   factor_test = np.loadtxt(dir_name + "/factor_test.csv",delimiter='\t')
-  #TODO get mood
-  #mood_test = np.loadtxt(dir_name + "/mood_train" + i_csv ,delimiter=',')
+  if(name_num!=4):
+    _mood = np.loadtxt(dir_name + "/TESTestimated_m.csv",delimiter=',')
 
-  target_row = 2#to 6j:w
-  target_len = 5
+    _m=preprocessing.minmax_scale(_mood)
+    mood_test = _m*0.8+0.1*np.ones_like(_m)
 
-  for t in range(1,10):
-    if(t<5):
-      before_action_count = factor_test[t-1,target_row:target_row+target_len]*t
-      for action in range(5):
+    target_row = 2#to 6
+    target_len = ACTION_NUM
+
+    model = load_model(dir_name+"/nn_model.h5")
+
+    for t in range(1,11):
+      if(t<5):
+        multi_val = float(t)
+        div_val = float(t+1)
+      else:
+        multi_val = 5.0
+        div_val = 5.0
+
+      before_action_count = factor_test[t-1,target_row:target_row+target_len]*multi_val
+      _cand = np.zeros((ACTION_NUM,ACTION_NUM))
+      for action in range(ACTION_NUM):
         arr = np.zeros_like(before_action_count)
         arr[action]=1
-        _cand = before_action_count + arr 
-        action_cand=_cand/float(t+1)
-        print("action cand",action_cand)
-    else:
-      before_action_count = factor_test[t-1,target_row:target_row+target_len]*5
-      for action in range(5):
-        arr = np.zeros_like(before_action_count)
-        arr[action]=1
-        _cand = before_action_count + arr 
-        action_cand=_cand/5.0
-        print("action cand",action_cand)
-    input()
+        _cand[action,:] = before_action_count + arr
+      action_cand=_cand/div_val
+      _f=factor_test[t-1,:]
+      f=np.tile(_f,(ACTION_NUM,1))
+      f[:,target_row:target_row+target_len] = action_cand
+      m=np.tile(mood_test[t-1],(ACTION_NUM,1))
+      xtest=np.hstack((f,m.reshape(-1,1)))
 
-  import optuna
-  import keras.backend as K
-  from keras.models import Sequential, Model, load_model
-  from keras.layers import Input, Dense, Activation
-  from keras.layers.advanced_activations import LeakyReLU
+      dm_pred=model.predict(xtest)
 
+      #check 
+      a=np.copy(dm_pred)
+      order=np.argsort(np.argsort(a.reshape(5))[::-1])+1
+      _max_cand_val = dm_pred[np.argmax(a)]
+      percentage=a/_max_cand_val*100
 
-  m_pred = np.zeros_like(mood_test)
+      quiz_count=np.ones(ACTION_NUM)*(t)
+      action_num=np.linspace(1,ACTION_NUM,ACTION_NUM)
 
-  model = load_model(dir_name+"/nn_model.h5")
+      output_matome=np.hstack((quiz_count.reshape(-1,1),action_num.reshape(-1,1),dm_pred.reshape(-1,1),order.reshape(-1,1),percentage.reshape(-1,1)))
+      if(t==1):
+        output_all = np.copy(output_matome)
+      else:
+        output_all=np.append(output_all,output_matome,axis=0)
+    print(output_all)
 
-  #set data to test
-  for m_t in range(len(mood_test)):
-    x_tes = np.tile(factor_test[m_t],(100,1))
-    m_candidate = np.linspace(0,1,100)
-    y_ans = np.tile(face_test[m_t],(100,1))
-
-    xtest = np.hstack((x_tes,m_candidate.reshape(-1,1)))
-    ytest = model.predict(xtest)
-    err = ytest - y_ans
-    err_array = np.sum(err,1)
-    m_est = np.argmin(abs(err_array))
-    m_pred[m_t] = m_est/100.0
-    print("m_pred",m_pred)
-
-  #test output
-  outname = dir_name + "/TRAINestimated_nn" + i_csv
-  np.savetxt(outname,m_pred,fmt="%.3f")
+    #test output
+    outname = dir_name + "/dm_pred_allactions.csv"
+    np.savetxt(outname,output_all,fmt="%.3f")
