@@ -81,3 +81,4 @@ for name_num in (0,1,2,3,4,5,6,7,8):
 
   lossname = dir_name + "/nn_loss.csv"
   np.savetxt(lossname,train.history['loss'])
+  input()

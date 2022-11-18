@@ -18,10 +18,10 @@ for user_id in range(1,10):
     _b=selected_action_face[selected_action_face['user_num']==user_id]
     action_face=_b.values[:,0]
     print(user_id)
-    print(kibun_face)
-    print(action_face)
+    #print(kibun_face)
+    #print(action_face)
 
     mood_kibun_action=np.hstack((np.reshape(kibun_mood,(-1,1)),np.reshape(action,(-1,1))))
     face_kibun_action=np.hstack((np.reshape(kibun_face,(-1,1)),np.reshape(action_face,(-1,1))))
-    #print(mood_kibun_action)
-    print(face_kibun_action)
+    print(mood_kibun_action)
+    #print(face_kibun_action)

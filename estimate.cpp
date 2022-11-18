@@ -102,15 +102,14 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
   init_out<<id_num<<","<<count<<"==================="<<std::endl;
 
   while(errflg==0){
-    printf("checkpoint\n");
     std::cout<<"err"<<std::setprecision(10)<<err<<" count:"<<count<<", M:";
     mental_out<<"err"<<std::setprecision(10)<<err<<" count:"<<count<<", M:";
 
     for(int m_check=0;m_check<N;m_check++){
-      //cout<<std::setprecision(2)<<mental[m_check]<<", ";
+      std::cout<<std::setprecision(2)<<mental[m_check]<<", ";
       mental_out<<std::setprecision(2)<<mental[m_check]<<", ";
     }
-    //cout<<std::endl;
+    std::cout<<std::endl;
     mental_out<<std::endl;
 
     //MatrixXd W1_para(10,4);
@@ -128,7 +127,6 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
 
     //grad_descent(m_org,mental,W1_para,factor,sig_total,id_num,t,count);
     grad_descent(m_org,mental,W1_para,factor,sig_total,id_num,count);
-    printf("checkpoint grad\n");
 
     //S誤を求める
     err = abs(fE(W1_para, factor, mental,sig_total) - E_pre);
@@ -214,7 +212,7 @@ void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N
   int count=0;
   ofstream mental_out("mental_log_trial2.csv",ios::app);
 
-  while(err>0.0000001){
+  while(err>0.000001){
     double E_pre  = fE(W1_para, factor, M_org,sig_total);
     //std::cout<<"E_pre: "<<E_pre<<", ";
     for(int i=0;i<N;i++){
@@ -241,7 +239,6 @@ void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N
     memcpy(M_org,M,sizeof(Msize));
 
     mental_out<<"gd_descent("<<id_num<<"-"<<"-"<<moto_count<<"),"<<std::setprecision(10)<<err<<","<<count<<",";
-    std::cout<<"gd_descent("<<id_num<<"-"<<"-"<<moto_count<<"),"<<std::setprecision(10)<<err<<","<<count<<",";
     for(int m_check=0;m_check<N;m_check++){
       //cout<<std::setprecision(2)<<M[m_check]<<", ";
       mental_out<<std::setprecision(2)<<M[m_check]<<", ";
@@ -249,9 +246,8 @@ void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N
 
     //cout<<std::endl;
     mental_out<<std::endl;
-    std::cout<<std::endl;
     count++;
-    if(count>50000000){
+    if(count>10000){
       break;
     }
 
@@ -317,7 +313,6 @@ void get_para(double (&factor)[N][10], double (&signal)[N][4], double mental[N],
   setPhi(factor, mental,3,&Phi4);
 
   MatrixXd Sig_tar(N,4);//目標値tに相当します//最後の１列は全部１
-  printf("checkpoint getpara\n");
 
   for(int d_num=0;d_num<N;d_num++){
     for(int e_num=0;e_num<4;e_num++){

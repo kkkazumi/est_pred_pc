@@ -20,9 +20,9 @@ ACTION_NUM = 5
 for name_num in (0,1,2,3,4,5,6,7,8):
   dir_name = "./data/" + str(name_num+1)
   #test to output
-  factor_test = np.loadtxt(dir_name + "/factor_test.csv",delimiter='\t')
+  factor_test = np.loadtxt(dir_name + "/factor_test2.csv",delimiter='\t')
   if(name_num!=4):
-    _mood = np.loadtxt(dir_name + "/TESTestimated_m.csv",delimiter=',')
+    _mood = np.loadtxt(dir_name + "/TESTestimated_m2.csv",delimiter=',')
 
     _m=preprocessing.minmax_scale(_mood)
     mood_test = _m*0.8+0.1*np.ones_like(_m)
@@ -32,6 +32,7 @@ for name_num in (0,1,2,3,4,5,6,7,8):
 
     model = load_model(dir_name+"/nn_model.h5")
 
+    print(name_num,"user")
     for t in range(1,11):
       if(t<5):
         multi_val = float(t)
@@ -41,6 +42,7 @@ for name_num in (0,1,2,3,4,5,6,7,8):
         div_val = 5.0
 
       before_action_count = factor_test[t-1,target_row:target_row+target_len]*multi_val
+      print(before_action_count)
       _cand = np.zeros((ACTION_NUM,ACTION_NUM))
       for action in range(ACTION_NUM):
         arr = np.zeros_like(before_action_count)
@@ -69,8 +71,13 @@ for name_num in (0,1,2,3,4,5,6,7,8):
         output_all = np.copy(output_matome)
       else:
         output_all=np.append(output_all,output_matome,axis=0)
-    print(output_all)
+    #print(output_all)
 
-    #test output
-    outname = dir_name + "/dm_pred_allactions.csv"
-    np.savetxt(outname,output_all,fmt="%.3f")
+
+    #print("input save mode or not")
+    #mode = input()
+    #if(mode=="save"):
+    #  outname = dir_name + "/dm_pred_allactions2.csv"
+    #  np.savetxt(outname,output_all,fmt="%.3f")
+    #else:
+    #  print("not saves")

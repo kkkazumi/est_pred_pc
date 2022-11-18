@@ -66,9 +66,9 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
     //for(int t=0;t<TEST_NUM;t++){
     //std::cout<<"test num: "<<std::endl;
 
-    sprintf(factor_name,"/home/kazumi/prog/est_pred_pc/data/%d/factor_test.csv",id_num+1);
-    sprintf(signal_name,"/home/kazumi/prog/est_pred_pc/data/%d/signal_test.csv",id_num+1);
-    sprintf(out_name,"/home/kazumi/prog/est_pred_pc/data/%d/TESTestimated_m.csv",id_num+1);//コマンドライン引数のmental.csvのタイトルをファイル名にする
+    sprintf(factor_name,"/home/kazumi/prog/est_pred_pc/data/%d/factor_test2.csv",id_num+1);
+    sprintf(signal_name,"/home/kazumi/prog/est_pred_pc/data/%d/signal_test2.csv",id_num+1);
+    sprintf(out_name,"/home/kazumi/prog/est_pred_pc/data/%d/TESTestimated_m2.csv",id_num+1);//コマンドライン引数のmental.csvのタイトルをファイル名にする
 
     read_file(factor_name, 10,_factor);
     read_file(signal_name, 4,_signal);
@@ -93,9 +93,9 @@ int main(int argc, const char* argv[]){//(argv[0]=./estimate),argv[1]=usrname
     int count=0;
 
     char tmp_w_filename[50];
-    sprintf(tmp_w_filename,"weight_zero_trial4_%d.csv",id_num+1);
+    sprintf(tmp_w_filename,"weight_zero_trial4-2_%d.csv",id_num+1);
     char mental_out_file[50];
-    sprintf(mental_out_file,"mental_log_trial4_%d.csv",id_num+1);
+    sprintf(mental_out_file,"mental_log_trial4-2_%d.csv",id_num+1);
 
     ofstream init_out(tmp_w_filename,ios::app);
     ofstream mental_out(mental_out_file,ios::app);
@@ -174,7 +174,7 @@ void grad_descent(double M_org[N], double* M,MatrixXd W1_para,double (&factor)[N
   double Msize[N];
   int count=0;
   char mental_out_file[50];
-  sprintf(mental_out_file,"mental_log_trial5-%d.csv",id_num+1);
+  sprintf(mental_out_file,"mental_log_trial5-2-%d.csv",id_num+1);
   ofstream mental_out(mental_out_file,ios::app);
 
   while(err>0.0001){
