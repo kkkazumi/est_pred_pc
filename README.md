@@ -50,7 +50,7 @@
 1. `estimate.cpp`のコンパイル
 
 	```
-	$g++ estimate.cpp -std=c++11 -o estimate
+	$make estimate
 	```
 
 2. `estimate` を実行する
